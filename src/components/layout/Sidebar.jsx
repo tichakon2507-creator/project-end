@@ -1,68 +1,167 @@
 import {
+    FaHeartbeat,
+    FaBell,
+    FaMapMarkedAlt,
+    FaHistory,
+    FaMicrochip,
+    FaUsers,
+    FaCog
+} from "react-icons/fa";
 
-FaHeartbeat,
+import { NavLink } from "react-router-dom";
 
-FaBell,
+const menus = [
 
-FaHistory,
+    {
+        title:"Dashboard",
+        path:"/",
+        icon:<FaHeartbeat/>
+    },
 
-FaCog
+    {
+        title:"Health",
+        path:"/health",
+        icon:<FaHeartbeat/>
+    },
 
-}
+    {
+        title:"Emergency",
+        path:"/emergency",
+        icon:<FaBell/>
+    },
 
-from "react-icons/fa";
+    {
+        title:"GPS Tracking",
+        path:"/location",
+        icon:<FaMapMarkedAlt/>
+    },
 
-function Sidebar() {
+    {
+        title:"History",
+        path:"/history",
+        icon:<FaHistory/>
+    },
 
-    return (
+    {
+        title:"Device",
+        path:"/device",
+        icon:<FaMicrochip/>
+    },
 
-        <div className="w-72 bg-blue-700 text-white">
+    {
+        title:"Users",
+        path:"/users",
+        icon:<FaUsers/>
+    },
 
-            <div className="text-center text-2xl font-bold py-10">
+    {
+        title:"Settings",
+        path:"/settings",
+        icon:<FaCog/>
+    }
 
-                SHEM
+];
+
+function Sidebar(){
+
+    return(
+
+        <aside className="w-72 bg-slate-900 text-white flex flex-col">
+
+            <div className="p-8">
+
+                <h1 className="text-4xl font-bold">
+
+                    SHEM
+
+                </h1>
+
+                <p className="text-slate-400 mt-2">
+
+                    Smart Health & Emergency
+
+                </p>
 
             </div>
 
-            <div className="space-y-3 px-5">
+            <nav className="px-4 flex-1">
 
-                <button className="w-full flex items-center gap-3 p-4 rounded-xl bg-blue-800">
+                {
 
-                    <FaHeartbeat />
+                    menus.map(menu=>(
 
-                    Dashboard
+                        <NavLink
 
-                </button>
+                            key={menu.path}
 
-                <button className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-blue-800">
+                            to={menu.path}
 
-                    <FaBell />
+                            className={({isActive})=>
 
-                    Alerts
+                                `flex items-center gap-4 px-5 py-4 rounded-xl mb-2 transition
+                                ${isActive
+                                    ? "bg-blue-600"
+                                    : "hover:bg-slate-800"
+                                }`
+                            }
 
-                </button>
+                        >
 
-                <button className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-blue-800">
+                            {menu.icon}
 
-                    <FaHistory />
+                            {menu.title}
 
-                    History
+                        </NavLink>
 
-                </button>
+                    ))
 
-                <button className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-blue-800">
+                }
 
-                    <FaCog />
+            </nav>
 
-                    Settings
+            <div className="p-5 border-t border-slate-700">
 
-                </button>
+                <p>
+
+                    Device
+
+                    <span className="float-right text-green-400">
+
+                        ● Online
+
+                    </span>
+
+                </p>
+
+                <p className="mt-2">
+
+                    MQTT
+
+                    <span className="float-right text-green-400">
+
+                        Connected
+
+                    </span>
+
+                </p>
+
+                <p className="mt-2">
+
+                    Version
+
+                    <span className="float-right">
+
+                        v1.0.0
+
+                    </span>
+
+                </p>
 
             </div>
 
-        </div>
+        </aside>
 
-    )
+    );
 
 }
 
