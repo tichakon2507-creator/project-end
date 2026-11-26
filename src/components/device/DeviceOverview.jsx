@@ -1,115 +1,40 @@
-import {
-    FaMicrochip,
-    FaBatteryThreeQuarters,
-    FaWifi,
-    FaServer,
-} from "react-icons/fa";
+import { Skeleton } from "../common/Ui";
 
-const overview = [
-    {
-        title: "ESP32",
-        value: "Online",
-        color: "#22c55e",
-        icon: <FaMicrochip />,
-    },
-    {
-        title: "Battery",
-        value: "91%",
-        color: "#10b981",
-        icon: <FaBatteryThreeQuarters />,
-    },
-    {
-        title: "WiFi",
-        value: "-54 dBm",
-        color: "#2563eb",
-        icon: <FaWifi />,
-    },
-    {
-        title: "MQTT",
-        value: "Connected",
-        color: "#f59e0b",
-        icon: <FaServer />,
-    },
-];
-
-function DeviceOverview() {
-
+function DeviceOverview({ data = [], loading = false }) {
     return (
-
-        <div className="grid grid-cols-12 gap-6">
-
-            {overview.map((item, index) => (
-
-                <div
-                    key={index}
-                    className="col-span-3"
-                >
-
-                    <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6 h-[180px]">
-
-                        <div className="flex justify-between items-start">
-
-                            <div>
-
-                                <p className="text-slate-500 text-sm">
-
-                                    {item.title}
-
-                                </p>
-
-                                <h2
-                                    className="text-4xl font-bold mt-6"
-                                    style={{
-                                        color: item.color,
-                                    }}
-                                >
-
-                                    {item.value}
-
-                                </h2>
-
-                            </div>
-
-                            <div
-                                className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
-                                style={{
-                                    backgroundColor: `${item.color}20`,
-                                    color: item.color,
-                                }}
-                            >
-
-                                {item.icon}
-
-                            </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+            {data.map((item, index) => (
+                <div key={index} className="ui-card-hover p-5 md:p-6 h-full">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <p className="text-xs sm:text-sm text-slate-500 truncate">{item.title}</p>
+                            {loading ? (
+                                <Skeleton className="h-9 w-20 mt-4" />
+                            ) : (
+                                    <h2 className="ui-gradient-text text-2xl sm:text-3xl font-bold ui-num mt-4 break-words leading-tight">
+                                        {item.value}
+                                    </h2>
+                            )}
                         </div>
-
-                        <div className="mt-8">
-
-                            <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
-
-                                <div
-                                    className="h-full rounded-full"
-                                    style={{
-                                        width: "92%",
-                                        backgroundColor: item.color,
-                                    }}
-                                />
-
-                            </div>
-
+                        <div className="ui-gradient-icon w-12 h-12 shrink-0 text-xl">
+                            {item.icon}
                         </div>
-
                     </div>
-
                 </div>
-
             ))}
 
+            {loading && data.length === 0 && (
+                <div className="col-span-full ui-card p-8 text-center text-slate-400 text-sm font-medium">
+                    Loading device data...
+                </div>
+            )}
+            {!loading && data.length === 0 && (
+                <div className="col-span-full ui-card p-8 text-center text-slate-400 text-sm font-medium">
+                    No device data available yet
+                </div>
+            )}
         </div>
-
     );
-
 }
 
 export default DeviceOverview;

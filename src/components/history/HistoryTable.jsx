@@ -1,211 +1,98 @@
-import {
-    FaHeartbeat,
-    FaMapMarkerAlt,
-    FaMicrochip,
-    FaExclamationTriangle,
-} from "react-icons/fa";
+import { Cpu, HeartPulse, MapPin, TriangleAlert } from "lucide-react";
 
-const records = [
-    {
-        id: "LOG-1001",
-        date: "08/08/2026",
-        time: "14:20",
-        category: "Health",
-        detail: "Heart Rate : 82 BPM",
-        status: "Normal",
-    },
-    {
-        id: "LOG-1002",
-        date: "08/08/2026",
-        time: "14:15",
-        category: "GPS",
-        detail: "Location Updated",
-        status: "Success",
-    },
-    {
-        id: "LOG-1003",
-        date: "08/08/2026",
-        time: "13:58",
-        category: "Emergency",
-        detail: "Emergency Button Checked",
-        status: "Safe",
-    },
-    {
-        id: "LOG-1004",
-        date: "08/08/2026",
-        time: "13:40",
-        category: "Device",
-        detail: "ESP32 Connected",
-        status: "Online",
-    },
-    {
-        id: "LOG-1005",
-        date: "08/08/2026",
-        time: "13:12",
-        category: "Health",
-        detail: "Temperature : 36.8°C",
-        status: "Normal",
-    },
-    {
-        id: "LOG-1006",
-        date: "08/08/2026",
-        time: "12:55",
-        category: "GPS",
-        detail: "Speed : 12 km/h",
-        status: "Moving",
-    },
-];
+import { RowsSkeleton } from "../common/Ui";
 
 function getIcon(category) {
-
     switch (category) {
-
         case "Health":
-            return <FaHeartbeat className="text-red-500" />;
-
+            return <HeartPulse className="text-rose-500" size={16} />;
         case "GPS":
-            return <FaMapMarkerAlt className="text-blue-500" />;
-
+            return <MapPin className="text-sky-500" size={16} />;
         case "Emergency":
-            return <FaExclamationTriangle className="text-yellow-500" />;
-
+            return <TriangleAlert className="text-amber-500" size={16} />;
         default:
-            return <FaMicrochip className="text-green-500" />;
-
+            return <Cpu className="text-emerald-500" size={16} />;
     }
-
 }
 
 function getBadge(status) {
-
-    if (status === "Normal" || status === "Success" || status === "Online") {
-
-        return (
-            <span className="px-3 py-1 rounded-xl bg-green-100 text-green-700 text-sm font-semibold">
-                {status}
-            </span>
-        );
-
-    }
-
-    if (status === "Moving") {
-
-        return (
-            <span className="px-3 py-1 rounded-xl bg-blue-100 text-blue-700 text-sm font-semibold">
-                {status}
-            </span>
-        );
-
-    }
+    const ok = ["Normal", "Success", "Online"].includes(status);
+    const moving = status === "Moving";
 
     return (
-        <span className="px-3 py-1 rounded-xl bg-yellow-100 text-yellow-700 text-sm font-semibold">
+        <span
+            className={`ui-badge ${
+                ok
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : moving
+                        ? "bg-sky-50 text-sky-700 border-sky-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+            }`}
+        >
             {status}
         </span>
     );
-
 }
 
-function HistoryTable() {
-
+function HistoryTable({ records = [], loading = false, emptyMessage = "No records found." }) {
     return (
-
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6">
-
-            <div className="flex justify-between items-center mb-6">
-
-                <div>
-
-                    <h2 className="text-2xl font-bold text-slate-800">
-
-                        All History Records
-
-                    </h2>
-
-                    <p className="text-slate-500 mt-1">
-
-                        System logs and activity records
-
-                    </p>
-
+        <div className="ui-card p-5 md:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                        <Cpu size={20} />
+                    </div>
+                    <div>
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900">All History Records</h2>
+                        <p className="text-xs text-slate-500">System logs and activity records</p>
+                    </div>
                 </div>
-
-                <span className="text-slate-500">
-
+                <span className="ui-badge bg-slate-100 text-slate-600 border-slate-200 ui-num">
                     {records.length} Records
-
                 </span>
-
             </div>
 
-            <div className="overflow-x-auto">
-
-                <table className="w-full">
-
-                    <thead>
-
-                        <tr className="border-b">
-
-                            <th className="text-left py-4">ID</th>
-                            <th className="text-left">Date</th>
-                            <th className="text-left">Time</th>
-                            <th className="text-left">Category</th>
-                            <th className="text-left">Detail</th>
-                            <th className="text-left">Status</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {records.map((item) => (
-
-                            <tr
-                                key={item.id}
-                                className="border-b hover:bg-slate-50 transition"
-                            >
-
-                                <td className="py-5 font-semibold">
-
-                                    {item.id}
-
-                                </td>
-
-                                <td>{item.date}</td>
-
-                                <td>{item.time}</td>
-
-                                <td>
-
-                                    <div className="flex items-center gap-2">
-
-                                        {getIcon(item.category)}
-
-                                        {item.category}
-
-                                    </div>
-
-                                </td>
-
-                                <td>{item.detail}</td>
-
-                                <td>{getBadge(item.status)}</td>
-
+            {loading ? (
+                <RowsSkeleton count={5} columns={6} />
+            ) : records.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 text-sm font-medium">{emptyMessage}</div>
+            ) : (
+                <div className="overflow-x-auto -mx-2 px-2">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-slate-200 text-left text-[11px] uppercase tracking-wide text-slate-500">
+                                <th className="py-3 pr-4">ID</th>
+                                <th className="py-3 pr-4">Date</th>
+                                <th className="py-3 pr-4">Time</th>
+                                <th className="py-3 pr-4">Category</th>
+                                <th className="py-3 pr-4">Detail</th>
+                                <th className="py-3">Status</th>
                             </tr>
-
-                        ))}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
+                        </thead>
+                        <tbody>
+                            {records.map((item) => (
+                                <tr
+                                    key={item.id}
+                                    className="border-b border-slate-100 hover:bg-slate-50/70 transition-colors"
+                                >
+                                    <td className="py-3.5 pr-4 font-semibold text-slate-700 ui-num">{item.id}</td>
+                                    <td className="py-3.5 pr-4 text-slate-600 ui-num">{item.date}</td>
+                                    <td className="py-3.5 pr-4 text-slate-600 ui-timer">{item.time}</td>
+                                    <td className="py-3.5 pr-4">
+                                        <span className="flex items-center gap-2 text-slate-700">
+                                            {getIcon(item.category)} {item.category}
+                                        </span>
+                                    </td>
+                                    <td className="py-3.5 pr-4 text-slate-600">{item.detail}</td>
+                                    <td className="py-3.5">{getBadge(item.status)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
-
     );
-
 }
 
 export default HistoryTable;

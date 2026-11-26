@@ -1,445 +1,235 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import {
-    FaSave,
-    FaDownload,
-    FaUpload,
-    FaRedo,
-    FaTrash,
-    FaMoon,
-    FaGlobe,
-    FaClock,
-    FaDatabase,
-    FaCheckCircle,
-    FaServer,
-    FaMicrochip,
-} from "react-icons/fa";
+    CircleCheck,
+    Database,
+    Download,
+    Globe,
+    Moon,
+    RotateCcw,
+    Save,
+    Server,
+    Trash2,
+    Upload,
+    Cpu,
+} from "lucide-react";
+
+import { Spinner } from "../common/Ui";
+import { fetchSystemSettings, updateSystemSettings } from "../../services/api";
 
 function SystemSettings() {
-
     const [config, setConfig] = useState({
-
         theme: "light",
         language: "English",
         timezone: "Asia/Bangkok",
         autoBackup: true,
         autoUpdate: false,
-
     });
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const res = await fetchSystemSettings();
+                if (!isMounted) return;
+                const raw = res?.data || {};
+                const data = raw?.system_value ? JSON.parse(raw.system_value) : {};
+                setConfig((prev) => ({
+                    theme: data.theme || prev.theme,
+                    language: data.language || prev.language,
+                    timezone: data.timezone || prev.timezone,
+                    autoBackup: data.auto_backup ?? data.autoBackup ?? prev.autoBackup,
+                    autoUpdate: data.auto_update ?? data.autoUpdate ?? prev.autoUpdate,
+                }));
+            } catch (err) {
+                console.error("Failed to load system settings:", err);
+            }
+        };
+        load();
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const handleChange = (e) => {
-
         const { name, value, type, checked } = e.target;
-
         setConfig((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? checked : value,
         }));
+    };
 
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await updateSystemSettings({
+                theme: config.theme,
+                language: config.language,
+                timezone: config.timezone,
+                auto_backup: config.autoBackup,
+                auto_update: config.autoUpdate,
+            });
+            toast.success("System settings saved");
+        } catch (err) {
+            toast.error(`Failed to save system settings: ${err?.apiMessage || err.message}`);
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
-
-        <div className="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
-
-            {/* Header */}
-
-            <div className="bg-gradient-to-r from-slate-700 to-slate-900 px-8 py-6 flex justify-between items-center text-white">
-
+        <div className="ui-card overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-700 to-slate-900 px-6 sm:px-8 py-6 flex flex-wrap items-center justify-between gap-4 text-white">
                 <div>
-
-                    <h2 className="text-3xl font-bold">
-
-                        System Settings
-
-                    </h2>
-
-                    <p className="text-slate-300 mt-2">
-
-                        Configure dashboard preferences and maintenance
-
-                    </p>
-
+                    <h2 className="text-2xl font-bold">System Settings</h2>
+                    <p className="text-slate-300 text-sm mt-1">Dashboard preferences and maintenance</p>
                 </div>
-
-                <div className="bg-green-500 rounded-2xl px-5 py-3 flex items-center gap-3">
-
-                    <FaCheckCircle />
-
-                    System Ready
-
-                </div>
-
+                <span className="ui-badge bg-white/15 text-white border-white/25">
+                    <CircleCheck size={14} /> System Ready
+                </span>
             </div>
 
-            <div className="p-8 space-y-8">
-
-                {/* Preferences */}
-
+            <div className="p-6 sm:p-8 space-y-7">
                 <div>
-
-                    <h3 className="text-xl font-bold mb-5">
-
-                        Preferences
-
-                    </h3>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-
+                    <h3 className="text-base font-bold text-slate-800 mb-4">Preferences</h3>
+                    <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                         <div>
-
-                            <label className="block mb-2 font-semibold">
-
-                                Theme
-
+                            <label className="block mb-2 text-xs font-semibold text-slate-500 flex items-center gap-2">
+                                <Moon size={14} /> Theme
                             </label>
-
-                           <select
-    name="theme"
-    value={config.theme}
-    onChange={handleChange}
-    className="w-full px-4 py-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-500 outline-none"
->
-    <option value="light">Light</option>
-    <option value="dark">Dark</option>
-    <option value="system">System</option>
-</select>
-
-                        </div>
-
-                        <div>
-
-                            <label className="block mb-2 font-semibold">
-
-                                Language
-
-                            </label>
-
-                          <select
-    name="theme"
-    value={config.theme}
-    onChange={handleChange}
-    className="w-full px-4 py-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-500 outline-none"
->
-    <option value="light">Light</option>
-    <option value="dark">Dark</option>
-    <option value="system">System</option>
-</select>
-
-                        </div>
-
-                        <div>
-
-                            <label className="block mb-2 font-semibold">
-
-                                Time Zone
-
-                            </label>
-
                             <select
-    name="theme"
-    value={config.theme}
-    onChange={handleChange}
-    className="w-full px-4 py-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-500 outline-none"
->
-    <option value="light">Light</option>
-    <option value="dark">Dark</option>
-    <option value="system">System</option>
-</select>
+                                name="theme"
+                                value={config.theme}
+                                onChange={handleChange}
+                                className="ui-dropdown ui-input px-4 py-2.5 text-sm"
+                            >
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="system">System</option>
+                            </select>
                         </div>
-
-                        <div className="flex flex-col justify-center gap-5">
-
-                            <label className="flex items-center gap-3">
-
-                                <input
-                                    type="checkbox"
-                                    name="autoBackup"
-                                    checked={config.autoBackup}
-                                    onChange={handleChange}
-                                    className="w-5 h-5"
-                                />
-
-                                Enable Auto Backup
-
+                        <div>
+                            <label className="block mb-2 text-xs font-semibold text-slate-500 flex items-center gap-2">
+                                <Globe size={14} /> Language
                             </label>
-
-                            <label className="flex items-center gap-3">
-
-                                <input
-                                    type="checkbox"
-                                    name="autoUpdate"
-                                    checked={config.autoUpdate}
-                                    onChange={handleChange}
-                                    className="w-5 h-5"
-                                />
-
-                                Enable Auto Update
-
+                            <select
+                                name="language"
+                                value={config.language}
+                                onChange={handleChange}
+                                className="ui-dropdown ui-input px-4 py-2.5 text-sm"
+                            >
+                                <option>English</option>
+                                <option>Thai</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block mb-2 text-xs font-semibold text-slate-500 flex items-center gap-2">
+                                <Server size={14} /> Time Zone
                             </label>
-
+                            <select
+                                name="timezone"
+                                value={config.timezone}
+                                onChange={handleChange}
+                                className="ui-dropdown ui-input px-4 py-2.5 text-sm"
+                            >
+                                <option>Asia/Bangkok</option>
+                                <option>UTC</option>
+                                <option>Asia/Singapore</option>
+                            </select>
                         </div>
-
+                        <div className="flex flex-col justify-center gap-4">
+                            {[
+                                { name: "autoBackup", label: "Enable auto backup" },
+                                { name: "autoUpdate", label: "Enable auto update" },
+                            ].map((option) => (
+                                <label key={option.name} className="flex items-center gap-3 text-sm text-slate-700">
+                                    <input
+                                        type="checkbox"
+                                        name={option.name}
+                                        checked={config[option.name]}
+                                        onChange={handleChange}
+                                        className="w-4 h-4 accent-sky-600"
+                                    />
+                                    {option.label}
+                                </label>
+                            ))}
+                        </div>
                     </div>
-
-                </div>
-                                {/* System Status */}
-
-                <div className="grid lg:grid-cols-3 gap-6">
-
-                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-
-                        <div className="flex items-center gap-3 mb-5">
-
-                            <FaDatabase className="text-2xl text-blue-600" />
-
-                            <h3 className="font-bold text-lg">
-
-                                Database
-
-                            </h3>
-
-                        </div>
-
-                        <div className="space-y-3 text-sm">
-
-                            <div className="flex justify-between">
-
-                                <span>Status</span>
-
-                                <span className="font-semibold text-green-600">
-
-                                    Connected
-
-                                </span>
-
-                            </div>
-
-                            <div className="flex justify-between">
-
-                                <span>Engine</span>
-
-                                <span className="font-semibold">
-
-                                    MySQL 8.0
-
-                                </span>
-
-                            </div>
-
-                            <div className="flex justify-between">
-
-                                <span>Latency</span>
-
-                                <span className="font-semibold">
-
-                                    12 ms
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
-
-                        <div className="flex items-center gap-3 mb-5">
-
-                            <FaServer className="text-2xl text-green-600" />
-
-                            <h3 className="font-bold text-lg">
-
-                                API Server
-
-                            </h3>
-
-                        </div>
-
-                        <div className="space-y-3 text-sm">
-
-                            <div className="flex justify-between">
-
-                                <span>Status</span>
-
-                                <span className="font-semibold text-green-600">
-
-                                    Running
-
-                                </span>
-
-                            </div>
-
-                            <div className="flex justify-between">
-
-                                <span>Version</span>
-
-                                <span className="font-semibold">
-
-                                    v1.0.0
-
-                                </span>
-
-                            </div>
-
-                            <div className="flex justify-between">
-
-                                <span>Response</span>
-
-                                <span className="font-semibold">
-
-                                    24 ms
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
-
-                        <div className="flex items-center gap-3 mb-5">
-
-                            <FaMicrochip className="text-2xl text-orange-500" />
-
-                            <h3 className="font-bold text-lg">
-
-                                ESP32 Device
-
-                            </h3>
-
-                        </div>
-
-                        <div className="space-y-3 text-sm">
-
-                            <div className="flex justify-between">
-
-                                <span>Status</span>
-
-                                <span className="font-semibold text-green-600">
-
-                                    Online
-
-                                </span>
-
-                            </div>
-
-                            <div className="flex justify-between">
-
-                                <span>MQTT</span>
-
-                                <span className="font-semibold">
-
-                                    Connected
-
-                                </span>
-
-                            </div>
-
-                            <div className="flex justify-between">
-
-                                <span>Firmware</span>
-
-                                <span className="font-semibold">
-
-                                    1.0.0
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
                 </div>
 
-                {/* Maintenance */}
+                <div className="grid md:grid-cols-3 gap-4 md:gap-6">
+                    <div className="rounded-2xl bg-sky-50 border border-sky-200 p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Database size={18} className="text-sky-600" />
+                            <h3 className="font-bold text-sm text-slate-800">Database</h3>
+                        </div>
+                        <div className="flex justify-between text-xs"><span className="text-slate-500">Engine</span><span className="font-semibold text-slate-700">MySQL</span></div>
+                        <div className="flex justify-between text-xs mt-2"><span className="text-slate-500">Records</span><span className="font-semibold text-slate-700">Live from API</span></div>
+                    </div>
+                    <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Server size={18} className="text-emerald-600" />
+                            <h3 className="font-bold text-sm text-slate-800">API Server</h3>
+                        </div>
+                        <div className="flex justify-between text-xs"><span className="text-slate-500">Status</span><span className="font-semibold text-emerald-600">Running</span></div>
+                        <div className="flex justify-between text-xs mt-2"><span className="text-slate-500">Transport</span><span className="font-semibold text-slate-700">REST + Socket.IO</span></div>
+                    </div>
+                    <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Cpu size={18} className="text-amber-600" />
+                            <h3 className="font-bold text-sm text-slate-800">ESP32 Device</h3>
+                        </div>
+                        <div className="flex justify-between text-xs"><span className="text-slate-500">Transport</span><span className="font-semibold text-slate-700">MQTT</span></div>
+                        <div className="flex justify-between text-xs mt-2"><span className="text-slate-500">Status</span><span className="font-semibold text-slate-700">Live telemetry</span></div>
+                    </div>
+                </div>
 
                 <div>
-
-                    <h3 className="text-xl font-bold mb-5">
-
-                        Maintenance
-
-                    </h3>
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-
-                        <button className="flex flex-col items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl py-6 transition">
-
-                            <FaDownload size={28} />
-
-                            <span>Backup</span>
-
-                        </button>
-
-                        <button className="flex flex-col items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl py-6 transition">
-
-                            <FaUpload size={28} />
-
-                            <span>Restore</span>
-
-                        </button>
-
-                        <button className="flex flex-col items-center justify-center gap-3 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl py-6 transition">
-
-                            <FaRedo size={28} />
-
-                            <span>Restart</span>
-
-                        </button>
-
-                        <button className="flex flex-col items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl py-6 transition">
-
-                            <FaTrash size={28} />
-
-                            <span>Clear Cache</span>
-
-                        </button>
-
+                    <h3 className="text-base font-bold text-slate-800 mb-4">Maintenance</h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[
+                            { label: "Backup", icon: Download, tone: "bg-emerald-600 hover:bg-emerald-700" },
+                            { label: "Restore", icon: Upload, tone: "bg-sky-600 hover:bg-sky-700" },
+                            { label: "Restart", icon: RotateCcw, tone: "bg-amber-500 hover:bg-amber-600" },
+                            { label: "Clear Cache", icon: Trash2, tone: "bg-rose-600 hover:bg-rose-700" },
+                        ].map((action) => {
+                            const Icon = action.icon;
+                            return (
+                                <button
+                                    key={action.label}
+                                    type="button"
+                                    className={`ui-btn ui-press flex-col gap-2 text-white py-2.5 text-sm ${action.tone}`}
+                                >
+                                    <Icon size={24} /> {action.label}
+                                </button>
+                            );
+                        })}
                     </div>
-
                 </div>
 
-                {/* Footer */}
-
-                <div className="border-t pt-8 flex justify-between items-center">
-
+                <div className="border-t border-slate-100 pt-6 flex flex-wrap items-center justify-between gap-4">
                     <div>
-
-                        <h4 className="font-semibold">
-
-                            Smart Health & Emergency Dashboard
-
+                        <h4 className="font-semibold text-sm text-slate-800">
+                            Smart Health &amp; Emergency Dashboard
                         </h4>
-
-                        <p className="text-sm text-slate-500 mt-1">
-
-                            Version 1.0.0 • React + Vite • MQTT • MySQL • ESP32
-
+                        <p className="text-xs text-slate-500 mt-1 ui-num">
+                            Version 1.0.0 - React + Vite - MQTT - MySQL - ESP32
                         </p>
-
                     </div>
-
-                    <button className="flex items-center gap-3 bg-slate-800 hover:bg-black text-white px-8 py-3 rounded-xl transition">
-
-                        <FaSave />
-
-                        Save All Settings
-
+                    <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="ui-btn ui-press bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 text-sm"
+                    >
+                        {saving ? <Spinner /> : <Save size={16} />}
+                        {saving ? "Saving..." : "Save All Settings"}
                     </button>
-
                 </div>
-
             </div>
-
         </div>
-
     );
-
 }
 
 export default SystemSettings;

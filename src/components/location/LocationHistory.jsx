@@ -1,184 +1,58 @@
-import {
-    FaMapMarkerAlt,
-    FaClock,
-    FaRoute,
-    FaCheckCircle,
-} from "react-icons/fa";
+import { CircleCheck, Clock, MapPin, Route } from "lucide-react";
 
-const history = [
-    {
-        date: "08/08/2026",
-        time: "08:15",
-        latitude: "18.7883",
-        longitude: "98.9853",
-        speed: "12 km/h",
-        status: "Moving",
-    },
-    {
-        date: "08/08/2026",
-        time: "08:08",
-        latitude: "18.7879",
-        longitude: "98.9848",
-        speed: "8 km/h",
-        status: "Moving",
-    },
-    {
-        date: "08/08/2026",
-        time: "08:01",
-        latitude: "18.7875",
-        longitude: "98.9842",
-        speed: "0 km/h",
-        status: "Stopped",
-    },
-    {
-        date: "07/08/2026",
-        time: "18:40",
-        latitude: "18.7850",
-        longitude: "98.9818",
-        speed: "15 km/h",
-        status: "Moving",
-    },
-    {
-        date: "07/08/2026",
-        time: "18:10",
-        latitude: "18.7822",
-        longitude: "98.9795",
-        speed: "5 km/h",
-        status: "Moving",
-    },
-];
+import { RowsSkeleton } from "../common/Ui";
 
-function LocationHistory() {
-
+function LocationHistory({ rows = [], loading = false, emptyMessage = "No location history found." }) {
     return (
-
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6 h-[420px]">
-
-            <div className="flex justify-between items-center mb-6">
-
+        <div className="ui-card p-5 md:p-6 h-full">
+            <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+                    <Route size={20} />
+                </div>
                 <div>
-
-                    <h2 className="text-2xl font-bold text-slate-800">
-
-                        Location History
-
-                    </h2>
-
-                    <p className="text-slate-500 mt-1">
-
-                        Recent GPS Records
-
-                    </p>
-
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900">Location History</h2>
+                    <p className="text-xs text-slate-500">Recent GPS records</p>
                 </div>
-
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl transition">
-
-                    Export
-
-                </button>
-
             </div>
 
-            <div className="overflow-y-auto h-[300px] pr-2">
-
-                <div className="space-y-4">
-
-                    {history.map((item, index) => (
-
+            {loading ? (
+                <RowsSkeleton count={4} columns={3} />
+            ) : rows.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 text-sm font-medium">{emptyMessage}</div>
+            ) : (
+                <div className="space-y-3 max-h-[340px] overflow-y-auto pr-2">
+                    {rows.map((item, index) => (
                         <div
-                            key={index}
-                            className="border border-slate-200 rounded-2xl p-4 hover:bg-slate-50 transition"
+                            key={item.id || index}
+                            className="rounded-xl border border-slate-200 p-3.5 hover:bg-slate-50 transition-colors"
                         >
-
-                            <div className="flex justify-between items-start">
-
-                                <div>
-
-                                    <div className="flex items-center gap-2">
-
-                                        <FaClock className="text-slate-400" />
-
-                                        <span className="font-semibold">
-
-                                            {item.date}
-
-                                        </span>
-
-                                        <span className="text-slate-500">
-
-                                            {item.time}
-
-                                        </span>
-
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 ui-timer">
+                                        <Clock size={12} />
+                                        <span className="font-semibold text-slate-700">{item.date}</span>
+                                        <span>{item.time}</span>
                                     </div>
-
-                                    <div className="mt-4 flex items-center gap-2">
-
-                                        <FaMapMarkerAlt className="text-red-500" />
-
-                                        <span>
-
-                                            {item.latitude}, {item.longitude}
-
-                                        </span>
-
+                                    <div className="flex items-center gap-1.5 text-sm text-slate-700 ui-num mt-2">
+                                        <MapPin size={14} className="text-rose-500" />
+                                        {item.latitude}, {item.longitude}
                                     </div>
-
-                                    <div className="mt-2 flex items-center gap-2">
-
-                                        <FaRoute className="text-blue-500" />
-
-                                        <span>
-
-                                            Speed : {item.speed}
-
-                                        </span>
-
+                                    <div className="flex items-center gap-1.5 text-xs text-slate-500 ui-num mt-1">
+                                        <Route size={13} className="text-sky-500" />
+                                        Speed: {item.speed}
                                     </div>
-
                                 </div>
-
-                                <div>
-
-                                    {item.status === "Moving" ? (
-
-                                        <span className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-2 rounded-xl">
-
-                                            <FaCheckCircle />
-
-                                            Moving
-
-                                        </span>
-
-                                    ) : (
-
-                                        <span className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-700 px-3 py-2 rounded-xl">
-
-                                            <FaCheckCircle />
-
-                                            Stopped
-
-                                        </span>
-
-                                    )}
-
-                                </div>
-
+                                <span className="ui-badge bg-emerald-50 text-emerald-700 border-emerald-200">
+                                    <CircleCheck size={13} />
+                                    {item.status}
+                                </span>
                             </div>
-
                         </div>
-
                     ))}
-
                 </div>
-
-            </div>
-
+            )}
         </div>
-
     );
-
 }
 
 export default LocationHistory;

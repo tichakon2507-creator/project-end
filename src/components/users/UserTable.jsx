@@ -1,220 +1,125 @@
-import {
-    FaHeartbeat,
-    FaUserShield,
-    FaCircle,
-    FaEdit,
-    FaTrash,
-} from "react-icons/fa";
+import { HeartPulse, Pencil, ShieldCheck, Trash2, Users } from "lucide-react";
 
-const users = [
-    {
-        id: "U001",
-        name: "John Smith",
-        role: "Patient",
-        age: 28,
-        gender: "Male",
-        heart: "82 BPM",
-        status: "Online",
-    },
-    {
-        id: "U002",
-        name: "Emily Johnson",
-        role: "Patient",
-        age: 32,
-        gender: "Female",
-        heart: "79 BPM",
-        status: "Offline",
-    },
-    {
-        id: "U003",
-        name: "Michael Brown",
-        role: "Caregiver",
-        age: 40,
-        gender: "Male",
-        heart: "-",
-        status: "Online",
-    },
-    {
-        id: "U004",
-        name: "Sarah Wilson",
-        role: "Patient",
-        age: 24,
-        gender: "Female",
-        heart: "88 BPM",
-        status: "Online",
-    },
-    {
-        id: "U005",
-        name: "David Miller",
-        role: "Administrator",
-        age: 36,
-        gender: "Male",
-        heart: "-",
-        status: "Online",
-    },
-];
+import { RowsSkeleton, Spinner, StatusDot } from "../common/Ui";
 
-function UserTable() {
-
+function UserTable({
+    users = [],
+    loading = false,
+    selectedUserId = "",
+    updatingId = null,
+    onSelect = () => {},
+    onUpdateStatus = async () => {},
+}) {
     return (
-
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6">
-
-            <div className="flex justify-between items-center mb-6">
-
-                <div>
-
-                    <h2 className="text-2xl font-bold text-slate-800">
-
-                        User List
-
-                    </h2>
-
-                    <p className="text-slate-500 mt-1">
-
-                        Registered users in the system
-
-                    </p>
-
+        <div className="ui-card p-5 md:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                        <Users size={20} />
+                    </div>
+                    <div>
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900">User List</h2>
+                        <p className="text-xs text-slate-500">Registered users in the system</p>
+                    </div>
                 </div>
-
-                <span className="text-slate-500">
-
+                <span className="ui-badge bg-slate-100 text-slate-600 border-slate-200 ui-num">
                     {users.length} Users
-
                 </span>
-
             </div>
 
-            <div className="overflow-x-auto">
-
-                <table className="w-full">
-
-                    <thead>
-
-                        <tr className="border-b">
-
-                            <th className="text-left py-4">ID</th>
-                            <th className="text-left">Name</th>
-                            <th className="text-left">Role</th>
-                            <th className="text-left">Age</th>
-                            <th className="text-left">Heart</th>
-                            <th className="text-left">Status</th>
-                            <th className="text-center">Action</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {users.map((user) => (
-
-                            <tr
-                                key={user.id}
-                                className="border-b hover:bg-slate-50 transition"
-                            >
-
-                                <td className="py-5 font-semibold">
-
-                                    {user.id}
-
-                                </td>
-
-                                <td>
-
-                                    {user.name}
-
-                                </td>
-
-                                <td>
-
-                                    <div className="flex items-center gap-2">
-
-                                        {user.role === "Patient" ? (
-                                            <FaHeartbeat className="text-red-500" />
-                                        ) : (
-                                            <FaUserShield className="text-blue-500" />
-                                        )}
-
-                                        {user.role}
-
-                                    </div>
-
-                                </td>
-
-                                <td>
-
-                                    {user.age}
-
-                                </td>
-
-                                <td>
-
-                                    {user.heart}
-
-                                </td>
-
-                                <td>
-
-                                    {user.status === "Online" ? (
-
-                                        <span className="inline-flex items-center gap-2 text-green-600 font-semibold">
-
-                                            <FaCircle className="text-xs" />
-
-                                            Online
-
-                                        </span>
-
-                                    ) : (
-
-                                        <span className="inline-flex items-center gap-2 text-slate-500 font-semibold">
-
-                                            <FaCircle className="text-xs" />
-
-                                            Offline
-
-                                        </span>
-
-                                    )}
-
-                                </td>
-
-                                <td>
-
-                                    <div className="flex justify-center gap-3">
-
-                                        <button className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition">
-
-                                            <FaEdit className="mx-auto" />
-
-                                        </button>
-
-                                        <button className="w-10 h-10 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 transition">
-
-                                            <FaTrash className="mx-auto" />
-
-                                        </button>
-
-                                    </div>
-
-                                </td>
-
+            {loading ? (
+                <RowsSkeleton count={5} columns={7} />
+            ) : users.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 text-sm font-medium">
+                    No users found in the database yet.
+                </div>
+            ) : (
+                <div className="overflow-x-auto -mx-2 px-2">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-slate-200 text-left text-[11px] uppercase tracking-wide text-slate-500">
+                                <th className="py-3 pr-4">ID</th>
+                                <th className="py-3 pr-4">Name</th>
+                                <th className="py-3 pr-4">Role</th>
+                                <th className="py-3 pr-4">Age</th>
+                                <th className="py-3 pr-4">Heart</th>
+                                <th className="py-3 pr-4">Status</th>
+                                <th className="py-3 text-center">Action</th>
                             </tr>
-
-                        ))}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
+                        </thead>
+                        <tbody>
+                            {users.map((user, index) => {
+                                const id = user.id ?? user.user_id ?? "";
+                                const isSelected = id && id === selectedUserId;
+                                const online = (user.status || "").toLowerCase() === "online";
+                                const updating = updatingId === id;
+                                return (
+                                    <tr
+                                        key={id || index}
+                                        onClick={() => id && onSelect(id)}
+                                        className={`border-b border-slate-100 hover:bg-slate-50/70 transition-colors cursor-pointer ${
+                                            isSelected ? "bg-sky-50/50" : ""
+                                        }`}
+                                    >
+                                        <td className="py-3.5 pr-4 font-semibold text-slate-700 ui-num">{id}</td>
+                                        <td className="py-3.5 pr-4 text-slate-800">{user.name || user.username || "N/A"}</td>
+                                        <td className="py-3.5 pr-4">
+                                            <span className="flex items-center gap-2 text-slate-700">
+                                                {(user.role || "").toLowerCase() === "patient"
+                                                    ? <HeartPulse size={15} className="text-rose-500" />
+                                                    : <ShieldCheck size={15} className="text-sky-500" />}
+                                                {user.role || "—"}
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 pr-4 text-slate-600 ui-num">
+                                            {user.age != null ? user.age : "N/A"}
+                                        </td>
+                                        <td className="py-3.5 pr-4 text-slate-600 ui-num">
+                                            {user.heart != null ? user.heart : (user.heart_rate != null ? `${user.heart_rate} BPM` : "N/A")}
+                                        </td>
+                                        <td className="py-3.5 pr-4">
+                                            <span className={`ui-badge ${online ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                                                <StatusDot tone={online ? "emerald" : "slate"} staticDot />
+                                                {user.status || "Offline"}
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 text-center">
+                                            <div className="flex justify-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    aria-label="View user profile"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (id) onSelect(id);
+                                                    }}
+                                                    className={`ui-btn ui-press w-9 h-9 ${isSelected ? "bg-sky-600 text-white" : "bg-sky-50 text-sky-600 hover:bg-sky-100"}`}
+                                                >
+                                                    <Pencil size={15} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    aria-label="Set user offline"
+                                                    disabled={isSelected || updating}
+                                                    title="Manage user status via API"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onUpdateStatus(id, "offline");
+                                                    }}
+                                                    className="ui-btn ui-press w-9 h-9 bg-rose-50 text-rose-600 hover:bg-rose-100"
+                                                >
+                                                    {updating ? <Spinner className="w-4 h-4" /> : <Trash2 size={15} />}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
-
     );
-
 }
 
 export default UserTable;

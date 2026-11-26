@@ -1,120 +1,42 @@
-import {
-    FaHeartbeat,
-    FaMapMarkerAlt,
-    FaExclamationTriangle,
-    FaMicrochip,
-} from "react-icons/fa";
+import { TriangleAlert } from "lucide-react";
 
-const timeline = [
-    {
-        time: "14:20",
-        title: "Heart Rate Updated",
-        description: "Heart Rate changed to 82 BPM",
-        color: "bg-red-500",
-        icon: <FaHeartbeat />,
-    },
-    {
-        time: "14:15",
-        title: "GPS Updated",
-        description: "Device location refreshed",
-        color: "bg-blue-500",
-        icon: <FaMapMarkerAlt />,
-    },
-    {
-        time: "13:58",
-        title: "Emergency Button Checked",
-        description: "No emergency detected",
-        color: "bg-yellow-500",
-        icon: <FaExclamationTriangle />,
-    },
-    {
-        time: "13:40",
-        title: "Device Connected",
-        description: "ESP32 connected to MQTT Broker",
-        color: "bg-green-500",
-        icon: <FaMicrochip />,
-    },
-];
+import { RowsSkeleton } from "../common/Ui";
 
-function HistoryTimeline() {
-
+function HistoryTimeline({ items = [], loading = false, emptyMessage = "No activity events recorded yet." }) {
     return (
-
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6">
-
-            <div className="mb-6">
-
-                <h2 className="text-2xl font-bold text-slate-800">
-
-                    Activity Timeline
-
-                </h2>
-
-                <p className="text-slate-500 mt-1">
-
-                    Latest system activities
-
-                </p>
-
+        <div className="ui-card p-5 md:p-6">
+            <div className="mb-5">
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Activity Timeline</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Latest system activities</p>
             </div>
 
-            <div className="relative">
-
-                <div className="absolute left-6 top-0 bottom-0 w-1 bg-slate-200 rounded-full"></div>
-
-                <div className="space-y-8">
-
-                    {timeline.map((item, index) => (
-
-                        <div
-                            key={index}
-                            className="relative flex items-start gap-6"
-                        >
-
-                            <div
-                                className={`w-12 h-12 rounded-full ${item.color} text-white flex items-center justify-center z-10 shadow-lg`}
-                            >
-                                {item.icon}
-                            </div>
-
-                            <div className="flex-1 bg-slate-50 rounded-2xl p-5">
-
-                                <div className="flex justify-between items-center">
-
-                                    <h3 className="font-bold text-lg text-slate-800">
-
-                                        {item.title}
-
-                                    </h3>
-
-                                    <span className="text-sm text-slate-500">
-
-                                        {item.time}
-
-                                    </span>
-
+            {loading ? (
+                <RowsSkeleton count={3} columns={2} />
+            ) : items.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 text-sm font-medium">{emptyMessage}</div>
+            ) : (
+                <div className="relative">
+                    <div className="absolute left-5 top-0 bottom-0 w-px bg-slate-200" />
+                    <div className="space-y-5">
+                        {items.map((item) => (
+                            <div key={item.index} className="relative flex items-start gap-4">
+                                <div className="w-10 h-10 shrink-0 rounded-full bg-rose-500 text-white flex items-center justify-center z-10 shadow-lg shadow-rose-500/20">
+                                    <TriangleAlert size={17} />
                                 </div>
-
-                                <p className="text-slate-600 mt-2">
-
-                                    {item.description}
-
-                                </p>
-
+                                <div className="flex-1 min-w-0 rounded-xl bg-slate-50 p-4">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <h3 className="font-bold text-sm text-slate-800">{item.title}</h3>
+                                        <span className="text-xs text-slate-500 ui-timer">{item.time}</span>
+                                    </div>
+                                    <p className="text-sm text-slate-600 mt-1.5">{item.description}</p>
+                                </div>
                             </div>
-
-                        </div>
-
-                    ))}
-
+                        ))}
+                    </div>
                 </div>
-
-            </div>
-
+            )}
         </div>
-
     );
-
 }
 
 export default HistoryTimeline;

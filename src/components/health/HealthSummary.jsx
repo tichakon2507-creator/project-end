@@ -1,116 +1,41 @@
-import {
-    FaHeart,
-    FaLungs,
-    FaTemperatureHigh,
-    FaWeight,
-    FaWalking,
-    FaBed,
-} from "react-icons/fa";
+import { Activity } from "lucide-react";
 
-const summary = [
-    {
-        title: "Heart Rate",
-        value: "82 BPM",
-        icon: <FaHeart />,
-        color: "text-red-500",
-        bg: "bg-red-100",
-    },
-    {
-        title: "SpO₂",
-        value: "98 %",
-        icon: <FaLungs />,
-        color: "text-blue-500",
-        bg: "bg-blue-100",
-    },
-    {
-        title: "Temperature",
-        value: "36.8 °C",
-        icon: <FaTemperatureHigh />,
-        color: "text-orange-500",
-        bg: "bg-orange-100",
-    },
-    {
-        title: "Weight",
-        value: "65 kg",
-        icon: <FaWeight />,
-        color: "text-green-600",
-        bg: "bg-green-100",
-    },
-    {
-        title: "Steps",
-        value: "6,532",
-        icon: <FaWalking />,
-        color: "text-indigo-600",
-        bg: "bg-indigo-100",
-    },
-    {
-        title: "Sleep",
-        value: "7.5 hrs",
-        icon: <FaBed />,
-        color: "text-purple-600",
-        bg: "bg-purple-100",
-    },
-];
-
-function HealthSummary() {
-
+function HealthSummary({ items = [] }) {
     return (
-
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6 h-[400px]">
-
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">
-
-                Today's Summary
-
-            </h2>
-
-            <div className="space-y-4">
-
-                {summary.map((item, index) => (
-
-                    <div
-                        key={index}
-                        className="flex items-center justify-between bg-slate-50 rounded-2xl p-4"
-                    >
-
-                        <div className="flex items-center gap-4">
-
+        <div className="ui-card p-5 md:p-6 h-full">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-5">Today's Summary</h2>
+            {items.length === 0 ? (
+                <div className="h-[300px] flex flex-col items-center justify-center gap-3 text-slate-400">
+                    <Activity size={34} strokeWidth={1.5} />
+                    <p className="text-sm font-medium">No summary data available yet</p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {items.map((item, index) => {
+                        const Icon = item.icon || Activity;
+                        return (
                             <div
-                                className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${item.bg} ${item.color}`}
+                                key={index}
+                                className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3.5"
                             >
-                                {item.icon}
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="ui-gradient-icon w-10 h-10 shrink-0">
+                                        <Icon size={19} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-slate-500">{item.title}</p>
+                                        <p className="font-semibold text-sm text-slate-800 ui-num">
+                                            {item.value ?? "N/A"}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-
-                            <div>
-
-                                <p className="text-slate-500 text-sm">
-
-                                    {item.title}
-
-                                </p>
-
-                                <p className="font-bold text-slate-800">
-
-                                    {item.value}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-
-                    </div>
-
-                ))}
-
-            </div>
-
+                        );
+                    })}
+                </div>
+            )}
         </div>
-
     );
-
 }
 
 export default HealthSummary;

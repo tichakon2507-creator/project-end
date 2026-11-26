@@ -1,126 +1,81 @@
-import {
-    FaSearch,
-    FaFilter,
-    FaCalendarAlt,
-    FaDownload,
-} from "react-icons/fa";
+import { CalendarDays, Download, Search } from "lucide-react";
 
-function HistoryFilter() {
+import { FIELD_INPUT_CLASS, IconField } from "../common/Ui";
 
+const categories = ["All", "Health", "Emergency", "GPS", "Device"];
+
+function HistoryFilter({
+    search = "",
+    category = "All",
+    fromDate = "",
+    toDate = "",
+    onSearchChange = () => {},
+    onCategoryChange = () => {},
+    onFromDateChange = () => {},
+    onToDateChange = () => {},
+    onExport = () => {},
+}) {
     return (
-
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6">
-
-            <div className="grid grid-cols-12 gap-4 items-end">
-
-                <div className="col-span-3">
-
-                    <label className="block text-sm font-semibold text-slate-600 mb-2">
-
-                        Search
-
-                    </label>
-
-                    <div className="relative">
-
-                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-
+        <div className="ui-card p-5 md:p-6 space-y-5">
+            <div className="flex flex-wrap items-center gap-2">
+                {categories.map((item) => (
+                    <button
+                        key={item}
+                        type="button"
+                        onClick={() => onCategoryChange(item)}
+                        className={`ui-pill ${category === item ? "ui-pill-active" : ""}`}
+                    >
+                        {item}
+                    </button>
+                ))}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-12 gap-4 items-end">
+                <div className="xl:col-span-3">
+                    <label className="block text-xs font-semibold text-[var(--midnight-muted)] mb-2">Search</label>
+                    <IconField icon={Search}>
                         <input
                             type="text"
-                            placeholder="Search..."
-                            className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={search}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            placeholder="Search records..."
+                            className={FIELD_INPUT_CLASS}
                         />
-
-                    </div>
-
+                    </IconField>
                 </div>
-
-                <div className="col-span-2">
-
-                    <label className="block text-sm font-semibold text-slate-600 mb-2">
-
-                        Category
-
-                    </label>
-
-                    <div className="relative">
-
-                        <FaFilter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-
-                        <select className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-
-                            <option>All</option>
-                            <option>Health</option>
-                            <option>Emergency</option>
-                            <option>GPS</option>
-                            <option>Device</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-                <div className="col-span-2">
-
-                    <label className="block text-sm font-semibold text-slate-600 mb-2">
-
-                        From
-
-                    </label>
-
-                    <div className="relative">
-
-                        <FaCalendarAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-
+                <div className="xl:col-span-2">
+                    <label className="block text-xs font-semibold text-[var(--midnight-muted)] mb-2">From</label>
+                    <IconField icon={CalendarDays}>
                         <input
                             type="date"
-                            className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl"
+                            value={fromDate}
+                            onChange={(e) => onFromDateChange(e.target.value)}
+                            className={`${FIELD_INPUT_CLASS} ui-num`}
                         />
-
-                    </div>
-
+                    </IconField>
                 </div>
-
-                <div className="col-span-2">
-
-                    <label className="block text-sm font-semibold text-slate-600 mb-2">
-
-                        To
-
-                    </label>
-
-                    <div className="relative">
-
-                        <FaCalendarAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-
+                <div className="xl:col-span-2">
+                    <label className="block text-xs font-semibold text-[var(--midnight-muted)] mb-2">To</label>
+                    <IconField icon={CalendarDays}>
                         <input
                             type="date"
-                            className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl"
+                            value={toDate}
+                            onChange={(e) => onToDateChange(e.target.value)}
+                            className={`${FIELD_INPUT_CLASS} ui-num`}
                         />
-
-                    </div>
-
+                    </IconField>
                 </div>
-
-                <div className="col-span-3">
-
-                    <button className="w-full flex justify-center items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl transition">
-
-                        <FaDownload />
-
-                        Export History
-
+                <div className="xl:col-span-3">
+                    <button
+                        type="button"
+                        onClick={onExport}
+                        className="ui-btn ui-press ui-gradient w-full text-white px-4 py-2.5 text-sm"
+                    >
+                        <Download size={16} /> Export History
                     </button>
-
                 </div>
-
             </div>
-
         </div>
-
     );
-
 }
 
 export default HistoryFilter;

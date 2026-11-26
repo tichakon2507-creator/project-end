@@ -1,454 +1,212 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import {
-    FaMapMarkedAlt,
-    FaKey,
-    FaGlobeAsia,
-    FaCrosshairs,
-    FaSave,
-    FaMap,
-    FaCheckCircle,
-    FaLocationArrow,
-    FaSatellite,
-    FaCompass,
-} from "react-icons/fa";
+    ChevronDown,
+    CircleCheck,
+    Compass,
+    Crosshair,
+    Globe,
+    KeyRound,
+    Map,
+    MapPinned,
+    Navigation,
+    Save,
+    Satellite,
+} from "lucide-react";
+
+import { FIELD_INPUT_CLASS, IconField, Spinner } from "../common/Ui";
+import { fetchSystemSettings, updateSystemSettings } from "../../services/api";
 
 function GoogleMapSettings() {
-
     const [config, setConfig] = useState({
-
         apiKey: "",
-        latitude: "18.788343",
-        longitude: "98.985300",
+        latitude: "",
+        longitude: "",
         zoom: "15",
         mapType: "roadmap",
-
     });
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        const load = async () => {
+            try {
+                const res = await fetchSystemSettings();
+                if (!isMounted) return;
+                const raw = res?.data || {};
+                const data = raw?.system_value ? JSON.parse(raw.system_value) : {};
+                setConfig((prev) => ({
+                    apiKey: data.google_map_api_key || data.apiKey || prev.apiKey,
+                    latitude: data.default_lat || data.latitude || prev.latitude,
+                    longitude: data.default_lng || data.longitude || prev.longitude,
+                    zoom: data.default_zoom || data.zoom || prev.zoom,
+                    mapType: data.map_type || data.mapType || prev.mapType,
+                }));
+            } catch (err) {
+                console.error("Failed to load map settings:", err);
+            }
+        };
+        load();
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const handleChange = (e) => {
-
         const { name, value } = e.target;
-
-        setConfig((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-
+        setConfig((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await updateSystemSettings({
+                google_map_api_key: config.apiKey,
+                default_lat: config.latitude,
+                default_lng: config.longitude,
+                default_zoom: config.zoom,
+                map_type: config.mapType,
+            });
+            toast.success("Map settings saved");
+        } catch (err) {
+            toast.error(`Failed to save map settings: ${err?.apiMessage || err.message}`);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const fields = [
+        { name: "apiKey", label: "Google Maps API Key", icon: KeyRound, type: "password", full: true, numeric: false, placeholder: "API key" },
+        { name: "latitude", label: "Latitude", icon: Globe, numeric: true },
+        { name: "longitude", label: "Longitude", icon: Crosshair, numeric: true },
+        { name: "zoom", label: "Default Zoom", icon: Map, numeric: true },
+    ];
+
     return (
-
-        <div className="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
-
-            {/* Header */}
-
-            <div className="bg-gradient-to-r from-cyan-600 to-blue-600 px-8 py-6 flex justify-between items-center text-white">
-
+        <div className="ui-card overflow-hidden">
+            <div className="bg-gradient-to-r from-cyan-600 to-sky-600 px-6 sm:px-8 py-6 flex flex-wrap items-center justify-between gap-4 text-white">
                 <div>
-
-                    <h2 className="text-3xl font-bold">
-
-                        Google Maps Configuration
-
-                    </h2>
-
-                    <p className="text-cyan-100 mt-2">
-
-                        Configure Google Maps API & GPS Settings
-
-                    </p>
-
+                    <h2 className="text-2xl font-bold">Google Maps Configuration</h2>
+                    <p className="text-cyan-100 text-sm mt-1">Configure map provider and default GPS view</p>
                 </div>
-
-                <div className="bg-green-500 rounded-2xl px-5 py-3 flex items-center gap-3">
-
-                    <FaCheckCircle />
-
-                    Ready
-
-                </div>
-
+                <span className="ui-badge bg-white/15 text-white border-white/25">
+                    <CircleCheck size={14} /> Ready
+                </span>
             </div>
 
-            <div className="p-8 space-y-8">
-
+            <div className="p-6 sm:p-8 space-y-7">
                 <div>
-
-                    <h3 className="text-xl font-bold mb-5">
-
-                        Maps Configuration
-
-                    </h3>
-
-                    <div className="grid grid-cols-2 gap-6">
-
-                        <div className="col-span-2">
-
-                            <label className="block mb-2 font-semibold">
-
-                                Google Maps API Key
-
-                            </label>
-
-                            <div className="relative">
-
-                                <FaKey className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-
-                                <input
-                                    type="password"
-                                    name="apiKey"
-                                    value={config.apiKey}
-                                    onChange={handleChange}
-                                    placeholder="AIzaSy..."
-                                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-cyan-500 outline-none"
-                                />
-
-                            </div>
-
-                        </div>
-
+                    <h3 className="text-base font-bold text-slate-800 mb-4">Maps Configuration</h3>
+                    <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                        {fields.map((field) => {
+                            const Icon = field.icon;
+                            return (
+                                <div key={field.name} className={field.full ? "md:col-span-2" : ""}>
+                                    <label className="block mb-2 text-xs font-semibold text-slate-500">{field.label}</label>
+                                    <IconField icon={Icon}>
+                                        <input
+                                            type={field.type || "text"}
+                                            name={field.name}
+                                            value={config[field.name]}
+                                            onChange={handleChange}
+                                            className={`${FIELD_INPUT_CLASS} ${field.numeric ? "ui-num" : ""}`}
+                                        />
+                                    </IconField>
+                                </div>
+                            );
+                        })}
                         <div>
-
-                            <label className="block mb-2 font-semibold">
-
-                                Latitude
-
-                            </label>
-
-                            <div className="relative">
-
-                                <FaGlobeAsia className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-
-                                <input
-                                    name="latitude"
-                                    value={config.latitude}
-                                    onChange={handleChange}
-                                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-cyan-500 outline-none"
-                                />
-
-                            </div>
-
-                        </div>
-
-                        <div>
-
-                            <label className="block mb-2 font-semibold">
-
-                                Longitude
-
-                            </label>
-
-                            <div className="relative">
-
-                                <FaCrosshairs className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-
-                                <input
-                                    name="longitude"
-                                    value={config.longitude}
-                                    onChange={handleChange}
-                                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-cyan-500 outline-none"
-                                />
-
-                            </div>
-
-                        </div>
-
-                        <div>
-
-                            <label className="block mb-2 font-semibold">
-
-                                Default Zoom
-
-                            </label>
-
-                            <input
-                                name="zoom"
-                                value={config.zoom}
-                                onChange={handleChange}
-                                className="w-full px-4 py-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-cyan-500 outline-none"
-                            />
-
-                        </div>
-
-                        <div>
-
-                            <label className="block mb-2 font-semibold">
-
-                                Map Type
-
-                            </label>
-
-                            <div className="relative">
-
-                                <FaMap className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-
+                            <label className="block mb-2 text-xs font-semibold text-slate-500">Map Type</label>
+                            <IconField icon={Map}>
                                 <select
                                     name="mapType"
                                     value={config.mapType}
                                     onChange={handleChange}
-                                    className="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-cyan-500 outline-none"
+                                    className={`${FIELD_INPUT_CLASS} appearance-none`}
                                 >
-
                                     <option value="roadmap">Roadmap</option>
                                     <option value="satellite">Satellite</option>
                                     <option value="hybrid">Hybrid</option>
                                     <option value="terrain">Terrain</option>
-
                                 </select>
-
-                            </div>
-
+                                <ChevronDown
+                                    size={16}
+                                    className="shrink-0 text-[var(--midnight-muted)]"
+                                    aria-hidden="true"
+                                />
+                            </IconField>
                         </div>
-
                     </div>
-
-                </div>
-                                {/* Preview & Information */}
-
-                <div className="grid lg:grid-cols-3 gap-6">
-
-                    {/* Preview */}
-
-                    <div className="lg:col-span-2 bg-slate-50 rounded-2xl border border-dashed border-slate-300 h-[320px] flex flex-col items-center justify-center">
-
-                        <FaMapMarkedAlt
-                            size={70}
-                            className="text-cyan-500"
-                        />
-
-                        <h3 className="text-2xl font-bold mt-5">
-
-                            Google Maps Preview
-
-                        </h3>
-
-                        <p className="text-slate-500 mt-2">
-
-                            Live map preview will appear after API integration
-
-                        </p>
-
-                        <div className="mt-8 flex gap-4">
-
-                            <div className="bg-white rounded-xl shadow-sm border px-5 py-3">
-
-                                <p className="text-sm text-slate-500">
-
-                                    Latitude
-
-                                </p>
-
-                                <h4 className="font-bold">
-
-                                    {config.latitude}
-
-                                </h4>
-
-                            </div>
-
-                            <div className="bg-white rounded-xl shadow-sm border px-5 py-3">
-
-                                <p className="text-sm text-slate-500">
-
-                                    Longitude
-
-                                </p>
-
-                                <h4 className="font-bold">
-
-                                    {config.longitude}
-
-                                </h4>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    {/* Status */}
-
-                    <div className="space-y-6">
-
-                        <div className="bg-green-50 border border-green-200 rounded-2xl p-5">
-
-                            <div className="flex items-center gap-3 mb-4">
-
-                                <FaLocationArrow className="text-green-600 text-2xl"/>
-
-                                <h3 className="font-bold">
-
-                                    GPS Status
-
-                                </h3>
-
-                            </div>
-
-                            <div className="space-y-3">
-
-                                <div className="flex justify-between">
-
-                                    <span>Signal</span>
-
-                                    <span className="font-semibold text-green-600">
-
-                                        Excellent
-
-                                    </span>
-
-                                </div>
-
-                                <div className="flex justify-between">
-
-                                    <span>Satellites</span>
-
-                                    <span className="font-semibold">
-
-                                        14
-
-                                    </span>
-
-                                </div>
-
-                                <div className="flex justify-between">
-
-                                    <span>Accuracy</span>
-
-                                    <span className="font-semibold">
-
-                                        ±3 m
-
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
-
-                            <div className="flex items-center gap-3 mb-4">
-
-                                <FaSatellite className="text-blue-600 text-2xl"/>
-
-                                <h3 className="font-bold">
-
-                                    Maps Information
-
-                                </h3>
-
-                            </div>
-
-                            <div className="space-y-3">
-
-                                <div className="flex justify-between">
-
-                                    <span>Provider</span>
-
-                                    <span className="font-semibold">
-
-                                        Google Maps
-
-                                    </span>
-
-                                </div>
-
-                                <div className="flex justify-between">
-
-                                    <span>Zoom</span>
-
-                                    <span className="font-semibold">
-
-                                        {config.zoom}
-
-                                    </span>
-
-                                </div>
-
-                                <div className="flex justify-between">
-
-                                    <span>Type</span>
-
-                                    <span className="font-semibold capitalize">
-
-                                        {config.mapType}
-
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5">
-
-                            <div className="flex items-center gap-3 mb-4">
-
-                                <FaCompass className="text-orange-500 text-2xl"/>
-
-                                <h3 className="font-bold">
-
-                                    Default Location
-
-                                </h3>
-
-                            </div>
-
-                            <p className="text-sm text-slate-600 leading-7">
-
-                                Chiang Mai, Thailand
-
-                            </p>
-
-                            <p className="text-xs text-slate-400 mt-2">
-
-                                Used when GPS signal is unavailable.
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
                 </div>
 
-                {/* Action */}
+                <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
+                    <div className="lg:col-span-2 rounded-2xl bg-slate-50 border border-dashed border-slate-300 h-[280px] flex flex-col items-center justify-center text-center px-4">
+                        <div className="w-14 h-14 rounded-2xl bg-white text-cyan-500 flex items-center justify-center shadow-sm">
+                            <MapPinned size={28} />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-700 mt-4">Map Preview</h3>
+                        <p className="text-sm text-slate-500 mt-1">Use the live map pages to preview the configured provider</p>
+                        <div className="mt-6 flex gap-4">
+                            <div className="rounded-xl bg-white border border-slate-200 px-4 py-2.5 shadow-sm">
+                                <p className="text-[11px] text-slate-500">Latitude</p>
+                                <p className="font-bold text-sm text-slate-700 ui-num mt-0.5">{config.latitude}</p>
+                            </div>
+                            <div className="rounded-xl bg-white border border-slate-200 px-4 py-2.5 shadow-sm">
+                                <p className="text-[11px] text-slate-500">Longitude</p>
+                                <p className="font-bold text-sm text-slate-700 ui-num mt-0.5">{config.longitude}</p>
+                            </div>
+                        </div>
+                    </div>
 
-                <div className="border-t pt-8 flex justify-between items-center">
+                    <div className="space-y-4">
+                        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Navigation size={17} className="text-emerald-600" />
+                                <h3 className="font-bold text-sm text-slate-800">GPS Status</h3>
+                            </div>
+                            <div className="flex justify-between text-xs"><span className="text-slate-500">Source</span><span className="font-semibold text-slate-700">Device GPS</span></div>
+                            <div className="flex justify-between text-xs mt-2"><span className="text-slate-500">Coordinates</span><span className="font-semibold text-slate-700 ui-num">Configured</span></div>
+                        </div>
+                        <div className="rounded-2xl bg-sky-50 border border-sky-200 p-5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Satellite size={17} className="text-sky-600" />
+                                <h3 className="font-bold text-sm text-slate-800">Maps Information</h3>
+                            </div>
+                            <div className="flex justify-between text-xs"><span className="text-slate-500">Provider</span><span className="font-semibold text-slate-700">Google / OSM</span></div>
+                            <div className="flex justify-between text-xs mt-2"><span className="text-slate-500">Zoom</span><span className="font-semibold text-slate-700 ui-num">{config.zoom}</span></div>
+                            <div className="flex justify-between text-xs mt-2"><span className="text-slate-500">Type</span><span className="font-semibold text-slate-700 capitalize">{config.mapType}</span></div>
+                        </div>
+                        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Compass size={17} className="text-amber-600" />
+                                <h3 className="font-bold text-sm text-slate-800">Default Location</h3>
+                            </div>
+                            <p className="text-xs text-[var(--midnight-muted)]">Coordinates are read from the saved system settings.</p>
+                        </div>
+                    </div>
+                </div>
 
-                    <button className="px-6 py-3 rounded-xl border border-slate-300 hover:bg-slate-100 transition">
-
+                <div className="border-t border-slate-100 pt-6 flex flex-wrap items-center justify-between gap-4">
+                    <button
+                        type="button"
+                        onClick={() => setConfig({ apiKey: "", latitude: "", longitude: "", zoom: "15", mapType: "roadmap" })}
+                        className="ui-btn ui-press border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 px-5 py-2.5 text-sm"
+                    >
                         Reset
-
                     </button>
-
-                    <div className="flex gap-4">
-
-                        <button className="px-6 py-3 rounded-xl border border-cyan-500 text-cyan-600 hover:bg-cyan-50 transition">
-
-                            Test API Key
-
-                        </button>
-
-                        <button className="flex items-center gap-3 bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 rounded-xl transition">
-
-                            <FaSave />
-
-                            Save Configuration
-
-                        </button>
-
-                    </div>
-
+                    <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="ui-btn ui-press bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-2.5 text-sm"
+                    >
+                        {saving ? <Spinner /> : <Save size={16} />}
+                        {saving ? "Saving..." : "Save Configuration"}
+                    </button>
                 </div>
-
             </div>
-
         </div>
-
     );
-
 }
 
 export default GoogleMapSettings;

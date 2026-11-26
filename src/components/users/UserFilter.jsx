@@ -1,107 +1,75 @@
-import {
-    FaSearch,
-    FaFilter,
-    FaUserTag,
-    FaDownload,
-} from "react-icons/fa";
+import { Download, Search, UserRound } from "lucide-react";
 
-function UserFilter() {
+import { FIELD_INPUT_CLASS, IconField } from "../common/Ui";
 
+const roles = ["All Users", "Patient", "Caregiver", "Administrator"];
+const statuses = ["All", "Online", "Offline"];
+
+function UserFilter({
+    search = "",
+    roleFilter = "All Users",
+    statusFilter = "All",
+    onSearchChange = () => {},
+    onRoleChange = () => {},
+    onStatusChange = () => {},
+    onExport = () => {},
+}) {
     return (
-
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6">
-
-            <div className="grid grid-cols-12 gap-4 items-end">
-
-                <div className="col-span-4">
-
-                    <label className="block text-sm font-semibold text-slate-600 mb-2">
-
-                        Search User
-
-                    </label>
-
-                    <div className="relative">
-
-                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-
+        <div className="ui-card p-5 md:p-6 space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-12 gap-4 items-end">
+                <div className="xl:col-span-6">
+                    <label className="block text-xs font-semibold text-[var(--midnight-muted)] mb-2">Search User</label>
+                    <IconField icon={Search}>
                         <input
                             type="text"
-                            placeholder="Search by name, ID or email..."
-                            className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={search}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            placeholder="Search by name or username..."
+                            className={FIELD_INPUT_CLASS}
                         />
-
-                    </div>
-
+                    </IconField>
                 </div>
-
-                <div className="col-span-3">
-
-                    <label className="block text-sm font-semibold text-slate-600 mb-2">
-
-                        Role
-
-                    </label>
-
-                    <div className="relative">
-
-                        <FaUserTag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-
-                        <select className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-
-                            <option>All Users</option>
-                            <option>Patient</option>
-                            <option>Caregiver</option>
-                            <option>Administrator</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-                <div className="col-span-2">
-
-                    <label className="block text-sm font-semibold text-slate-600 mb-2">
-
-                        Status
-
-                    </label>
-
-                    <div className="relative">
-
-                        <FaFilter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-
-                        <select className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-
-                            <option>All</option>
-                            <option>Online</option>
-                            <option>Offline</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-                <div className="col-span-3">
-
-                    <button className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl transition">
-
-                        <FaDownload />
-
-                        Export Users
-
+                <div className="xl:col-span-6 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={onExport}
+                        className="ui-btn ui-press ui-gradient text-white px-5 py-2.5 text-sm"
+                    >
+                        <Download size={16} /> Export Users
                     </button>
-
                 </div>
-
             </div>
-
+            <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <UserRound size={15} className="text-[var(--midnight-muted)]" />
+                    <div className="flex flex-wrap gap-2">
+                        {roles.map((role) => (
+                            <button
+                                key={role}
+                                type="button"
+                                onClick={() => onRoleChange(role)}
+                                className={`ui-pill ${roleFilter === role ? "ui-pill-active" : ""}`}
+                            >
+                                {role}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    {statuses.map((status) => (
+                        <button
+                            key={status}
+                            type="button"
+                            onClick={() => onStatusChange(status)}
+                            className={`ui-pill ${statusFilter === status ? "ui-pill-active" : ""}`}
+                        >
+                            {status}
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
-
     );
-
 }
 
 export default UserFilter;

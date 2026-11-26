@@ -1,105 +1,71 @@
-import {
-    FaExclamationTriangle,
-    FaCheckCircle,
-    FaClock,
-} from "react-icons/fa";
+import { Bell, CheckCircle2, Clock, TriangleAlert } from "lucide-react";
 
-const alerts = [
-    {
-        time: "12:30",
-        type: "Heart Rate",
-        status: "Normal",
-        icon: <FaCheckCircle className="text-green-600" />,
-    },
-    {
-        time: "11:45",
-        type: "Temperature",
-        status: "Normal",
-        icon: <FaCheckCircle className="text-green-600" />,
-    },
-    {
-        time: "10:20",
-        type: "Emergency Button",
-        status: "No Alert",
-        icon: <FaExclamationTriangle className="text-orange-500" />,
-    },
-    {
-        time: "09:15",
-        type: "GPS Update",
-        status: "Success",
-        icon: <FaClock className="text-blue-500" />,
-    },
-];
+import { RowsSkeleton, StatusDot } from "../common/Ui";
+import { formatTime } from "../../utils/format";
 
-function AlertTable() {
+const AlertTable = ({ alerts = [], emptyMessage = "No recent activity", loading = false, title = "Recent Activity", subtitle = "Latest device and emergency events" }) => {
     return (
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6">
-
-            <div className="flex justify-between items-center mb-6">
-
-                <h2 className="text-2xl font-bold text-slate-800">
-
-                    Recent Activity
-
-                </h2>
-
-                <button className="text-blue-600 font-semibold">
-
-                    View All
-
-                </button>
-
-            </div>
-
-            <div className="space-y-4">
-
-                {alerts.map((item, index) => (
-
-                    <div
-                        key={index}
-                        className="flex items-center justify-between border-b border-slate-100 pb-4"
-                    >
-
-                        <div className="flex items-center gap-4">
-
-                            <div className="text-2xl">
-
-                                {item.icon}
-
-                            </div>
-
-                            <div>
-
-                                <p className="font-semibold">
-
-                                    {item.type}
-
-                                </p>
-
-                                <p className="text-slate-500 text-sm">
-
-                                    {item.time}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <span className="font-semibold text-slate-700">
-
-                            {item.status}
-
-                        </span>
-
+        <div className="ui-card p-5 md:p-6">
+            <div className="flex items-center justify-between gap-4 mb-5">
+                <div className="flex items-center gap-3">
+                    <div className="ui-gradient-icon w-10 h-10 shrink-0">
+                        <Bell size={20} />
                     </div>
-
-                ))}
-
+                    <div>
+                        <h2 className="text-lg sm:text-xl font-bold text-white">{title}</h2>
+                        <p className="text-xs text-[var(--midnight-muted)]">{subtitle}</p>
+                    </div>
+                </div>
+                <span className="ui-badge ui-num">
+                    {alerts.length} alerts
+                </span>
             </div>
 
+            {loading ? (
+                <RowsSkeleton count={4} columns={3} />
+            ) : alerts.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 text-sm font-medium">
+                    {emptyMessage}
+                </div>
+            ) : (
+                <div className="space-y-3 max-h-[380px] overflow-y-auto pr-2">
+                    {alerts.map((alert, index) => {
+                        const emergency = alert.severity === "emergency" || String(alert.status).toUpperCase() === "ACTIVE";
+                        return (
+                            <div
+                                key={alert.id || `${alert.type}-${index}`}
+                                className="flex items-center justify-between gap-4 rounded-xl bg-white/5 p-3"
+                            >
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div
+                                        className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${
+                                            emergency ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"
+                                        }`}
+                                    >
+                                        {emergency ? <TriangleAlert size={17} /> : <CheckCircle2 size={17} />}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-sm text-slate-800 truncate">{alert.type}</p>
+                                        <div className="flex items-center gap-1.5 text-xs text-slate-500 ui-timer">
+                                            <Clock size={12} />
+                                            {formatTime(alert.time)}
+                                        </div>
+                                        {alert.location && alert.location !== "N/A" && (
+                                            <p className="text-[11px] text-slate-400 ui-num mt-0.5">{alert.location}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <span className={`ui-badge shrink-0 ${emergency ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
+                                    <StatusDot tone={emergency ? "rose" : "emerald"} staticDot />
+                                    {alert.status}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
-}
+};
 
 export default AlertTable;

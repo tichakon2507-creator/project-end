@@ -1,132 +1,56 @@
-import {
-    FaMicrochip,
-    FaWifi,
-    FaBatteryThreeQuarters,
-    FaBluetooth,
-    FaDatabase,
-    FaCloud,
-} from "react-icons/fa";
+import { Battery, Cloud, Cpu, Database, Wifi } from "lucide-react";
 
-const devices = [
-    {
-        title: "ESP32",
-        value: "Online",
-        color: "text-green-600",
-        bg: "bg-green-100",
-        icon: <FaMicrochip />,
-    },
-    {
-        title: "WiFi",
-        value: "-54 dBm",
-        color: "text-blue-600",
-        bg: "bg-blue-100",
-        icon: <FaWifi />,
-    },
-    {
-        title: "Battery",
-        value: "91%",
-        color: "text-emerald-600",
-        bg: "bg-emerald-100",
-        icon: <FaBatteryThreeQuarters />,
-    },
-    {
-        title: "Bluetooth",
-        value: "Connected",
-        color: "text-cyan-600",
-        bg: "bg-cyan-100",
-        icon: <FaBluetooth />,
-    },
-    {
-        title: "Database",
-        value: "Connected",
-        color: "text-orange-600",
-        bg: "bg-orange-100",
-        icon: <FaDatabase />,
-    },
-    {
-        title: "Cloud",
-        value: "Online",
-        color: "text-purple-600",
-        bg: "bg-purple-100",
-        icon: <FaCloud />,
-    },
-];
+import { StatusDot } from "../common/Ui";
+import { formatDateTime } from "../../utils/format";
 
-function EmergencyDevice() {
+function StatusItem({ iconBg, Icon, title, value, ok }) {
+    return (
+        <div className="flex items-center justify-between gap-3 bg-slate-50 rounded-xl p-3.5">
+            <div className="flex items-center gap-3 min-w-0">
+                <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${iconBg}`}>
+                    <Icon size={19} />
+                </div>
+                <div className="min-w-0">
+                    <p className="font-semibold text-sm text-slate-800">{title}</p>
+                    <p className="text-[11px] text-slate-500">Module</p>
+                </div>
+            </div>
+            <span className={`flex items-center gap-1.5 text-sm font-semibold ui-num ${ok ? "text-emerald-600" : "text-slate-500"}`}>
+                <StatusDot tone={ok ? "emerald" : "slate"} staticDot />
+                {value}
+            </span>
+        </div>
+    );
+}
+
+function EmergencyDevice({ device = null, health = null, apiStatus = "disconnected" }) {
+    const battery = device?.battery_level != null ? `${device.battery_level}%` : "N/A";
+    const lastSeen = device?.last_seen || null;
+    const online = Boolean(device);
 
     return (
-
-        <div className="bg-white rounded-3xl shadow-md border border-slate-200 p-6 h-[420px]">
-
-            <div className="mb-6">
-
-                <h2 className="text-2xl font-bold text-slate-800">
-
-                    Device Status
-
-                </h2>
-
-                <p className="text-slate-500 mt-1">
-
-                    Smart Emergency Module
-
-                </p>
-
+        <div className="ui-card p-5 md:p-6 h-full">
+            <div className="mb-5">
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Device Status</h2>
+                <p className="text-xs text-slate-500 mt-1">Smart Emergency Module</p>
             </div>
 
-            <div className="space-y-4">
-
-                {devices.map((item, index) => (
-
-                    <div
-                        key={index}
-                        className="flex justify-between items-center bg-slate-50 rounded-2xl p-4"
-                    >
-
-                        <div className="flex items-center gap-4">
-
-                            <div
-                                className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${item.bg} ${item.color}`}
-                            >
-
-                                {item.icon}
-
-                            </div>
-
-                            <div>
-
-                                <p className="font-semibold text-slate-800">
-
-                                    {item.title}
-
-                                </p>
-
-                                <p className="text-sm text-slate-500">
-
-                                    Module
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <span className={`font-bold ${item.color}`}>
-
-                            {item.value}
-
-                        </span>
-
-                    </div>
-
-                ))}
-
+            <div className="space-y-3">
+                <StatusItem iconBg="bg-emerald-50 text-emerald-600" Icon={Cpu} title="ESP32" value={device ? device.status : "Offline"} ok={online} />
+                <StatusItem iconBg="bg-sky-50 text-sky-600" Icon={Wifi} title="WiFi" value="N/A" ok={false} />
+                <StatusItem iconBg="bg-emerald-50 text-emerald-600" Icon={Battery} title="Battery" value={battery} ok={device?.battery_level != null} />
+                <StatusItem iconBg="bg-cyan-50 text-cyan-600" Icon={Cloud} title="Cloud" value={apiStatus === "connected" ? "Online" : "Offline"} ok={apiStatus === "connected"} />
+                <StatusItem iconBg="bg-amber-50 text-amber-600" Icon={Database} title="Database" value={apiStatus === "connected" ? "Connected" : "Disconnected"} ok={apiStatus === "connected"} />
             </div>
 
+            {lastSeen && (
+                <div className="mt-5 pt-4 border-t border-slate-100 text-[11px] text-slate-400 ui-timer">
+                    Last Seen: {formatDateTime(lastSeen)}
+                    {health?.recorded_at && ` · Heart Rate: ${health.heart_rate}`}
+                </div>
+            )}
         </div>
-
     );
-
 }
 
 export default EmergencyDevice;

@@ -1,88 +1,32 @@
-import { motion } from "framer-motion";
-import { FaLocationArrow } from "react-icons/fa";
+import { Navigation, Radio } from "lucide-react";
 
-function GPSCard({
-    title,
-    value,
-    color,
-}) {
+import { formatDateTime } from "../../utils/format";
 
+function GPSCard({ title, value, lastUpdate = null, flash = false }) {
     return (
-
-        <motion.div
-            whileHover={{
-                y: -6,
-                scale: 1.02,
-            }}
-            transition={{
-                duration: 0.25,
-            }}
-            className="bg-white rounded-3xl shadow-md border border-slate-200 p-6 h-[170px]"
-        >
-
-            <div className="flex justify-between items-start">
-
-                <div>
-
-                    <p className="text-slate-500 text-sm">
-
-                        {title}
-
-                    </p>
-
-                    <h2
-                        className="text-3xl font-bold mt-5 break-all"
-                        style={{
-                            color,
-                        }}
-                    >
-
+        <div className={`ui-card-hover p-5 md:p-6 h-full ${flash ? "ui-flash" : ""}`}>
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-[var(--midnight-muted)] truncate">{title}</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white ui-num mt-4 break-all leading-tight">
                         {value}
-
                     </h2>
-
                 </div>
-
-                <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
-                    style={{
-                        backgroundColor: `${color}20`,
-                        color,
-                    }}
-                >
-
-                    <FaLocationArrow />
-
+                <div className="ui-gradient-icon w-12 h-12 shrink-0">
+                    <Navigation size={22} />
                 </div>
-
             </div>
-
-            <div className="mt-6">
-
-                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-
-                    <div
-                        className="h-full rounded-full"
-                        style={{
-                            width: "100%",
-                            backgroundColor: color,
-                        }}
-                    />
-
+            <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between gap-2">
+                <div className="ui-track flex-1">
+                    <div className="ui-gradient-bar w-full" />
                 </div>
-
-                <p className="text-xs text-slate-400 mt-2">
-
-                    GPS Live Data
-
-                </p>
-
+                <span className="flex items-center gap-1.5 text-[10px] text-[var(--midnight-muted)] ui-timer whitespace-nowrap">
+                    <Radio size={11} />
+                    {lastUpdate ? formatDateTime(lastUpdate) : "Live GPS"}
+                </span>
             </div>
-
-        </motion.div>
-
+        </div>
     );
-
 }
 
 export default GPSCard;
